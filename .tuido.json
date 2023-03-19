@@ -1,0 +1,37 @@
+[
+  {
+    "Name": "Allow the list to scroll vertical",
+    "Done": true
+  },
+  {
+    "Name": "Switch back to a single cursor row and reset it on tab switch"
+  },
+  {
+    "Name": "Separate the completed ones",
+    "Done": true
+  },
+  {
+    "Name": "Allow the list under the cursor to scroll horizontal?"
+  },
+  {
+    "Name": "Mark as done/not done"
+  },
+  {
+    "Name": "nested items... this is a tough one"
+  },
+  {
+    "Name": "delete an item"
+  },
+  {
+    "Name": "cursor bg extend full width"
+  },
+  {
+    "Name": "make other smaller bubbles for reuse"
+  },
+  {
+    "Name": "message when list is empty"
+  },
+  {
+    "Name": "support mouse clicks maybe"
+  }
+]
