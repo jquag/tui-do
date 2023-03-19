@@ -30,6 +30,7 @@ type Model struct {
   completedCursorRow int
   Tabs tabs.Model
   ListViewport viewport.Model
+  inactiveTabViewportOffset int
   ready bool
 } 
 
@@ -89,9 +90,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
   cursorRow := m.cursorRow()
   var cmds []tea.Cmd
 
+  prevTab := m.Tabs.ActiveIndex
+  prevYOffset := m.ListViewport.YOffset
   var cmd tea.Cmd
   m.Tabs, cmd = m.Tabs.Update(msg)
   cmds = append(cmds, cmd)
+  tabChanged := prevTab != m.Tabs.ActiveIndex
 
   switch msg := msg.(type) {
   case tea.KeyMsg:
@@ -147,6 +151,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
   m.ListViewport.SetContent(m.ContentView())
 
+  if tabChanged {
+    m.ListViewport.SetYOffset(m.inactiveTabViewportOffset)
+    m.inactiveTabViewportOffset = prevYOffset
+  }
+
   if !skipViewportUpdate {
     m.ListViewport, cmd = m.ListViewport.Update(msg)
     cmds = append(cmds, cmd)
@@ -198,3 +207,4 @@ func main() {
     os.Exit(1)
   }
 }
+
