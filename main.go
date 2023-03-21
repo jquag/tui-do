@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
-	"math"
 	"os"
 
+	"github.com/charmbracelet/bubbles/cursor"
+	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/jquag/tui-do/bubbles/tabs"
 	"github.com/jquag/tui-do/repo"
 	"github.com/jquag/tui-do/service"
@@ -24,14 +24,15 @@ const useHighPerformanceRenderer = false
 
 type Model struct {
   Svc *service.Service
-  IsAdding bool
-  IsDeleting bool
+  isAdding bool
+  isDeleting bool
   todoCursorRow int
   completedCursorRow int
   Tabs tabs.Model
   ListViewport viewport.Model
   inactiveTabViewportOffset int
   ready bool
+  textInput textinput.Model
 } 
 
 func (m Model) cursorRow() int {
@@ -66,9 +67,15 @@ func initialModel() Model {
   r := repo.NewRepo(filename)
   s := service.NewService(r)
 
+  ti := textinput.New()
+	ti.Placeholder = "enter TODO item"
+	ti.Width = 20
+  ti.Cursor.SetMode(cursor.CursorBlink)
+
   return Model{
     Svc: s,
     Tabs: tabs.New("TODO", "Complete"),
+    textInput: ti,
   }
 }
 
@@ -85,47 +92,65 @@ func (m Model) Init() tea.Cmd {
 // }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+  initialModel := m
   todos := m.Svc.Todos(m.Tabs.ActiveIndex == 1)
   skipViewportUpdate := false
   cursorRow := m.cursorRow()
   var cmds []tea.Cmd
 
-  prevTab := m.Tabs.ActiveIndex
-  prevYOffset := m.ListViewport.YOffset
   var cmd tea.Cmd
   m.Tabs, cmd = m.Tabs.Update(msg)
   cmds = append(cmds, cmd)
-  tabChanged := prevTab != m.Tabs.ActiveIndex
+  tabChanged := initialModel.Tabs.ActiveIndex != m.Tabs.ActiveIndex
 
   switch msg := msg.(type) {
   case tea.KeyMsg:
-    switch msg.String() {
+    if !m.isAdding {
+      switch msg.String() {
 
-    case "ctrl+c", "q":
-    return m, tea.Quit
+      case "ctrl+c", "q":
+      return m, tea.Quit
 
-    case "up", "k":
-    if cursorRow > 0 {
-      m.decCursorRow()
+      case "up", "k":
+      if cursorRow > 0 {
+        m.decCursorRow()
+      }
+      skipViewportUpdate = cursorRow - m.ListViewport.YOffset >= 2 // b/c cursor is not close to the top
+
+      case "down", "j":
+      if cursorRow < len(todos)-1 {
+        m.incCursorRow()
+      }
+      skipViewportUpdate = cursorRow <= m.ListViewport.Height - 3 // b/c cursor is not close to the bottom
+
+      case "a":
+        if m.Tabs.ActiveIndex == 0 {
+        m.isAdding = true
+        m.textInput.Focus()
+        m.textInput.SetValue("")
+        cmd := m.textInput.Cursor.BlinkCmd()
+        cmds = append(cmds, cmd)
+      }
+
+      }
+    } else {
+      switch msg.String() {
+
+      case "ctrl+c":
+      return m, tea.Quit
+
+      case tea.KeyEscape.String():
+      m.isAdding = false
+
+      case tea.KeyEnter.String():
+      m.isAdding = false
+      cmds = append(cmds, addTodoCommand(m.Svc, m.cursorRow(), m.textInput.Value()))
     }
-    skipViewportUpdate = cursorRow - m.ListViewport.YOffset >= 2 // b/c cursor is not close to the top
-
-    case "down", "j":
-    if cursorRow < len(todos)-1 {
-      m.incCursorRow()
-    }
-    skipViewportUpdate = cursorRow <= m.ListViewport.Height - 3 // b/c cursor is not close to the bottom
-
-    // case "enter", " ":
-    //   if m.todos[m.cursor].Done {
-    //     m.todos[m.cursor].Done = false
-    //   } else {
-    //     m.todos[m.cursor].Done = true
-    //   }
-    //   return m, write_to_file_cmd(m)
   }
 
   case tea.WindowSizeMsg:
+    m.Tabs.Width = msg.Width
+    m.textInput.Width = msg.Width - 3
     headerHeight := 5 //TODO: calc this
     footerHeight := 3 //TODO: calc this
     verticalMarginHeight := headerHeight + footerHeight
@@ -145,19 +170,31 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
       m.ListViewport.Height = msg.Height - verticalMarginHeight
     }
 
-  // case []todo:
-  //   m.todos = msg
+  case string:
+    if msg == "todo-added" {
+      m.incCursorRow()
+      if (m.cursorRow() >= len(todos)) {
+        m.ListViewport.YOffset = m.ListViewport.YOffset + 1
+      }
+    }
+
   }
 
   m.ListViewport.SetContent(m.ContentView())
 
   if tabChanged {
     m.ListViewport.SetYOffset(m.inactiveTabViewportOffset)
-    m.inactiveTabViewportOffset = prevYOffset
+    m.inactiveTabViewportOffset = initialModel.ListViewport.YOffset
   }
 
-  if !skipViewportUpdate {
+  if !skipViewportUpdate && !m.isAdding {
     m.ListViewport, cmd = m.ListViewport.Update(msg)
+    cmds = append(cmds, cmd)
+  }
+
+  if initialModel.isAdding {
+    var cmd tea.Cmd
+    m.textInput, cmd = m.textInput.Update(msg)
     cmds = append(cmds, cmd)
   }
 
@@ -170,11 +207,10 @@ func (m Model) View() string {
 	}
 
   footer := "\n\n"+style.Muted.Render("Press ? help")
-  tabs := m.Tabs.View(int(math.Max(30.0, float64(lipgloss.Width(m.ContentView())))))
-  // m.ListViewport.SetContent(m.ContentView())
+  // tabs := m.Tabs.View(int(math.Max(30.0, float64(lipgloss.Width(m.ContentView())))))
+  tabs := m.Tabs.View()
 
   return fmt.Sprintf("%s\n\n%s\n%s", tabs, m.ListViewport.View(), footer)
-  // return style.Card.Render(tabs + "\n\n" + s)
 }
 
 func (m Model) ContentView() string {
@@ -191,13 +227,25 @@ func (m Model) ContentView() string {
     }
 
     if m.cursorRow() == i {
-      s += style.Highlight.Render(fmt.Sprintf("%s [%s] %s", cursor, checked, todo.Name))
+      if m.Tabs.ActiveIndex == 0 && m.isAdding {
+        s += fmt.Sprintf("%s [%s] %s", " ", checked, todo.Name)
+        s += "\n" + m.textInput.View()
+      } else {
+        s += style.Highlight.Render(fmt.Sprintf("%s [%s] %s", cursor, checked, todo.Name))
+      }
     } else {
       s += fmt.Sprintf("%s [%s] %s", cursor, checked, todo.Name)
     }
     s += "\n"
   }
   return s
+}
+
+func addTodoCommand(service *service.Service, index int, name string) tea.Cmd {
+  return func() tea.Msg {
+    service.AddTodo(index, name)
+    return "todo-added"
+  }
 }
 
 func main() {

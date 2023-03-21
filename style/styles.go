@@ -64,4 +64,3 @@ var TabFiller = lipgloss.NewStyle().
   BorderForeground(lipgloss.Color("#595959"))
 
 var Muted = lipgloss.NewStyle().Foreground(lipgloss.Color("#595959"))
-

@@ -23,6 +23,7 @@ type Model struct {
   Tabs []string
   ActiveIndex int
   KeyMap KeyMap
+  Width int
 }
 
 func New(tabs... string) Model {
@@ -55,10 +56,11 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
       m.prev()
     }
   }
+
   return m, nil
 }
 
-func (m Model) View(width int) string {
+func (m Model) View() string {
   var tabStrings []string
   for i, t := range m.Tabs {
     if i == m.ActiveIndex {
@@ -68,8 +70,8 @@ func (m Model) View(width int) string {
     }
   }
   w := lipgloss.Width(lipgloss.JoinHorizontal(lipgloss.Bottom, tabStrings...))
-  if w < width {
-    tabStrings = append(tabStrings, style.TabFiller.Render(strings.Repeat(" ", width - w - 4)))
+  if w < m.Width {
+    tabStrings = append(tabStrings, style.TabFiller.Render(strings.Repeat(" ", m.Width - w - 4)))
   }
   return lipgloss.JoinHorizontal(lipgloss.Bottom, tabStrings...)
 }
