@@ -2,52 +2,73 @@
   {
     "Id": "560147E4-6CFA-4D46-96C7-A88C0D3DC12C",
     "Name": "Allow the list to scroll vertical",
-    "Done": true
+    "Done": false,
+    "Children": null
   },
   {
     "Id": "160147E4-6CFA-4D46-96C7-A88C0D3DC12C",
     "Name": "remember scroll poistion",
-    "Done": true
+    "Done": true,
+    "Children": null
   },
   {
     "Id": "260147E4-6CFA-4D46-96C7-A88C0D3DC12C",
     "Name": "Separate the completed ones",
-    "Done": true
+    "Done": true,
+    "Children": null
   },
   {
     "Id": "360147E4-6CFA-4D46-96C7-A88C0D3DC12C",
-    "Name": "Allow the list under the cursor to scroll horizontal?"
+    "Name": "Allow the list under the cursor to scroll horizontal?",
+    "Done": true,
+    "Children": null
   },
   {
     "Id": "460147E4-6CFA-4D46-96C7-A88C0D3DC12C",
-    "Name": "Allow adding todos"
+    "Name": "Allow adding todos",
+    "Done": true,
+    "Children": null
   },
   {
     "Id": "660147E4-6CFA-4D46-96C7-A88C0D3DC12C",
-    "Name": "Mark as done/not done"
+    "Name": "Mark as done/not done",
+    "Done": false,
+    "Children": null
   },
   {
     "Id": "760147E4-6CFA-4D46-96C7-A88C0D3DC12C",
-    "Name": "nested items... this is a tough one"
+    "Name": "nested items... this is a tough one",
+    "Done": false,
+    "Children": null
   },
   {
     "Id": "860147E4-6CFA-4D46-96C7-A88C0D3DC12C",
-    "Name": "delete an item"
+    "Name": "delete an item",
+    "Done": false,
+    "Children": null
   },
   {
     "Id": "960147E4-6CFA-4D46-96C7-A88C0D3DC12C",
-    "Name": "cursor bg extend full width"
+    "Name": "cursor bg extend full width",
+    "Done": false,
+    "Children": null
   },
   {
     "Id": "060147E4-6CFA-4D46-96C7-A88C0D3DC12C",
-    "Name": "make other smaller bubbles for reuse"
+    "Name": "make other smaller bubbles for reuse",
+    "Done": false,
+    "Children": null
   },
   {
     "Id": "500147E4-6CFA-4D46-96C7-A88C0D3DC12C",
-    "Name": "message when list is empty"
+    "Name": "message when list is empty",
+    "Done": false,
+    "Children": null
   },
   {
     "Id": "510147E4-6CFA-4D46-96C7-A88C0D3DC12C",
-    "Name": "support mouse clicks maybe"
+    "Name": "support mouse clicks maybe",
+    "Done": false,
+    "Children": null
   }
 ]

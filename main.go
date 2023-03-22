@@ -108,29 +108,32 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
     if !m.isAdding {
       switch msg.String() {
 
-      case "ctrl+c", "q":
-      return m, tea.Quit
+        case "ctrl+c", "q":
+          return m, tea.Quit
 
-      case "up", "k":
-      if cursorRow > 0 {
-        m.decCursorRow()
-      }
-      skipViewportUpdate = cursorRow - m.ListViewport.YOffset >= 2 // b/c cursor is not close to the top
+        case "up", "k":
+          if cursorRow > 0 {
+            m.decCursorRow()
+          }
+          skipViewportUpdate = cursorRow - m.ListViewport.YOffset >= 2 // b/c cursor is not close to the top
 
-      case "down", "j":
-      if cursorRow < len(todos)-1 {
-        m.incCursorRow()
-      }
-      skipViewportUpdate = cursorRow <= m.ListViewport.Height - 3 // b/c cursor is not close to the bottom
+        case "down", "j":
+          if cursorRow < len(todos)-1 {
+            m.incCursorRow()
+          }
+          skipViewportUpdate = cursorRow <= m.ListViewport.Height - 3 // b/c cursor is not close to the bottom
 
-      case "a":
-        if m.Tabs.ActiveIndex == 0 {
-        m.isAdding = true
-        m.textInput.Focus()
-        m.textInput.SetValue("")
-        cmd := m.textInput.Cursor.BlinkCmd()
-        cmds = append(cmds, cmd)
-      }
+        case "a":
+          if m.Tabs.ActiveIndex == 0 {
+            m.isAdding = true
+            m.textInput.Focus()
+            m.textInput.SetValue("")
+            cmd := m.textInput.Cursor.BlinkCmd()
+            cmds = append(cmds, cmd)
+          }
+
+        case tea.KeyEnter.String(), " ":
+          cmds = append(cmds, toggleTodoCommand(m.Svc, todos[m.cursorRow()]))
 
       }
     } else {
@@ -175,6 +178,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
       m.incCursorRow()
       if (m.cursorRow() >= len(todos)) {
         m.ListViewport.YOffset = m.ListViewport.YOffset + 1
+      }
+    }
+
+    if msg == "todo-toggled" {
+      if (m.cursorRow() >= len(todos)) {
+        m.decCursorRow()
       }
     }
 
@@ -245,6 +254,13 @@ func addTodoCommand(service *service.Service, index int, name string) tea.Cmd {
   return func() tea.Msg {
     service.AddTodo(index, name)
     return "todo-added"
+  }
+}
+
+func toggleTodoCommand(service *service.Service, item repo.Todo) tea.Cmd {
+  return func() tea.Msg {
+    service.ToggleTodo(item)
+    return "todo-toggled"
   }
 }
 
