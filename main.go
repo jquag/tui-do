@@ -8,6 +8,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/jquag/tui-do/bubbles/modal"
 	"github.com/jquag/tui-do/bubbles/tabs"
 	"github.com/jquag/tui-do/repo"
 	"github.com/jquag/tui-do/service"
@@ -33,6 +34,9 @@ type Model struct {
   inactiveTabViewportOffset int
   ready bool
   textInput textinput.Model
+  width int
+  height int
+  confirmationModal modal.Model
 } 
 
 func (m Model) cursorRow() int {
@@ -83,14 +87,6 @@ func (m Model) Init() tea.Cmd {
   return nil
 }
 
-// func write_to_file_cmd(m model) tea.Cmd {
-//   return func() tea.Msg {
-//     content, _ := json.MarshalIndent(m.todos, "", "  ")
-//     os.WriteFile(m.filename, content, 0644)
-//     return nil
-//   }
-// }
-
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
   initialModel := m
   todos := m.Svc.Todos(m.Tabs.ActiveIndex == 1)
@@ -105,7 +101,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
   switch msg := msg.(type) {
   case tea.KeyMsg:
-    if !m.isAdding {
+    if !m.isAdding && !m.isDeleting {
       switch msg.String() {
 
         case "ctrl+c", "q":
@@ -135,25 +131,37 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
         case tea.KeyEnter.String(), " ":
           cmds = append(cmds, toggleTodoCommand(m.Svc, todos[m.cursorRow()]))
 
+        case "d":
+          m.isDeleting = true
+          m.confirmationModal.Title = "Are you sure you want to delete the item?"
+          m.confirmationModal.Body = todos[m.cursorRow()].Name
+      }
+    } else if m.isAdding {
+      switch msg.String() {
+        case "ctrl+c":
+          return m, tea.Quit
+
+        case tea.KeyEscape.String():
+          m.isAdding = false
+
+        case tea.KeyEnter.String():
+          m.isAdding = false
+          cmds = append(cmds, addTodoCommand(m.Svc, m.cursorRow(), m.textInput.Value()))
       }
     } else {
       switch msg.String() {
-
-      case "ctrl+c":
-      return m, tea.Quit
-
-      case tea.KeyEscape.String():
-      m.isAdding = false
-
-      case tea.KeyEnter.String():
-      m.isAdding = false
-      cmds = append(cmds, addTodoCommand(m.Svc, m.cursorRow(), m.textInput.Value()))
+        case "ctrl+c", "q":
+          return m, tea.Quit
+      }
     }
-  }
 
   case tea.WindowSizeMsg:
     m.Tabs.Width = msg.Width
     m.textInput.Width = msg.Width - 3
+    m.width = msg.Width
+    m.height = msg.Height
+    m.confirmationModal.Width = msg.Width
+    m.confirmationModal.Height = msg.Height
     headerHeight := 5 //TODO: calc this
     footerHeight := 3 //TODO: calc this
     verticalMarginHeight := headerHeight + footerHeight
@@ -181,10 +189,18 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
       }
     }
 
-    if msg == "todo-toggled" {
+    if msg == "todo-toggled" || msg == "todo-deleted" {
       if (m.cursorRow() >= len(todos)) {
         m.decCursorRow()
       }
+    }
+
+  case modal.ModalMsg:
+    if msg == modal.Confirmed {
+      m.isDeleting = false
+      cmds = append(cmds, deleteTodoCommand(m.Svc, todos[m.cursorRow()]))
+    } else if msg == modal.Cancelled {
+      m.isDeleting = false
     }
 
   }
@@ -207,6 +223,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
     cmds = append(cmds, cmd)
   }
 
+  if initialModel.isDeleting {
+    var cmd tea.Cmd
+    m.confirmationModal, cmd = m.confirmationModal.Update(msg)
+    cmds = append(cmds, cmd)
+  }
+
   return m, tea.Batch(cmds...)
 }
 
@@ -214,6 +236,10 @@ func (m Model) View() string {
   if !m.ready {
 		return "\n  Initializing..."
 	}
+
+  if m.isDeleting {
+    return m.confirmationModal.View()
+  }
 
   footer := "\n\n"+style.Muted.Render("Press ? help")
   // tabs := m.Tabs.View(int(math.Max(30.0, float64(lipgloss.Width(m.ContentView())))))
@@ -261,6 +287,13 @@ func toggleTodoCommand(service *service.Service, item repo.Todo) tea.Cmd {
   return func() tea.Msg {
     service.ToggleTodo(item)
     return "todo-toggled"
+  }
+}
+
+func deleteTodoCommand(service *service.Service, item repo.Todo) tea.Cmd {
+  return func() tea.Msg {
+    service.DeleteTodo(item)
+    return "todo-deleted"
   }
 }
 

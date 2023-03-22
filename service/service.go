@@ -63,6 +63,18 @@ func (s *Service) ToggleTodo(item repo.Todo) {
   }
 }
 
+func (s *Service) DeleteTodo(item repo.Todo) {
+  indexToDelete := -1
+  for i, t := range s.repo.Todos {
+    if t.Id == item.Id {
+      indexToDelete = i
+      break
+    }
+  }
+  s.repo.Todos = append(s.repo.Todos[:indexToDelete], s.repo.Todos[indexToDelete+1:]...)
+  s.repo.Persist()
+}
+
 //func AddTodoGroup(name string) model.TodoGroup {
 //  group := model.TodoGroup{Name: name, Id: uuid.New().String()}
 //  model.Inst.TodoGroups = append(model.Inst.TodoGroups, group)

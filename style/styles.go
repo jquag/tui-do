@@ -64,3 +64,6 @@ var TabFiller = lipgloss.NewStyle().
   BorderForeground(lipgloss.Color("#595959"))
 
 var Muted = lipgloss.NewStyle().Foreground(lipgloss.Color("#595959"))
+
+var ModalBox = lipgloss.NewStyle().Padding(0, 2).Border(lipgloss.NormalBorder(), true).BorderForeground(lipgloss.Color("#a0c278"))
+var ModalTitle = lipgloss.NewStyle().Foreground(lipgloss.Color("#a0c278")).Bold(true)

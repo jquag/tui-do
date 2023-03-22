@@ -32,7 +32,7 @@
   {
     "Id": "660147E4-6CFA-4D46-96C7-A88C0D3DC12C",
     "Name": "Mark as done/not done",
-    "Done": false,
+    "Done": true,
     "Children": null
   },
   {
@@ -48,26 +48,20 @@
     "Children": null
   },
   {
-    "Id": "960147E4-6CFA-4D46-96C7-A88C0D3DC12C",
-    "Name": "cursor bg extend full width",
-    "Done": false,
-    "Children": null
-  },
-  {
-    "Id": "060147E4-6CFA-4D46-96C7-A88C0D3DC12C",
-    "Name": "make other smaller bubbles for reuse",
-    "Done": false,
-    "Children": null
-  },
-  {
     "Id": "500147E4-6CFA-4D46-96C7-A88C0D3DC12C",
     "Name": "message when list is empty",
     "Done": false,
     "Children": null
   },
   {
-    "Id": "510147E4-6CFA-4D46-96C7-A88C0D3DC12C",
-    "Name": "support mouse clicks maybe",
+    "Id": "276ebd8c-82c8-45d9-95d4-f3c737a99c29",
+    "Name": "change the color of the active tab",
+    "Done": false,
+    "Children": null
+  },
+  {
+    "Id": "8e430305-b2f0-45b9-ac02-b5cf39c91677",
+    "Name": "edit item",
     "Done": false,
     "Children": null
   }
