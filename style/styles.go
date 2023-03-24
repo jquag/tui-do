@@ -36,13 +36,9 @@ var tabFillerBorder = lipgloss.Border{
 }
 
 var Highlight = lipgloss.NewStyle().
-  Bold(false).
-  Background(lipgloss.Color("#2d383f"))
+  Background(lipgloss.Color("#af8c8c")).
+  Foreground(lipgloss.Color("#060606"))
 
-var Title = lipgloss.NewStyle().
-  Bold(true).
-  Foreground(lipgloss.Color("#a0c278")).
-  Border(lipgloss.NormalBorder(), false, true, false, false)
 
 var Card = lipgloss.NewStyle().Padding(0, 1).Border(lipgloss.NormalBorder(), false)
 
@@ -50,7 +46,7 @@ var TabActive = lipgloss.NewStyle().
   Bold(true).
   Border(tabActiveBorder, true).
   Padding(0, 1).
-  Foreground(lipgloss.Color("#a0c278")).
+  Foreground(lipgloss.Color("#87a987")).
   BorderForeground(lipgloss.Color("#595959"))
 
 var TabInactive = lipgloss.NewStyle().

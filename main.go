@@ -27,6 +27,7 @@ type Model struct {
   Svc *service.Service
   isAdding bool
   isDeleting bool
+  isEditing bool
   todoCursorRow int
   completedCursorRow int
   Tabs tabs.Model
@@ -72,7 +73,6 @@ func initialModel() Model {
   s := service.NewService(r)
 
   ti := textinput.New()
-	ti.Placeholder = "enter TODO item"
 	ti.Width = 20
   ti.Cursor.SetMode(cursor.CursorBlink)
 
@@ -101,7 +101,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
   switch msg := msg.(type) {
   case tea.KeyMsg:
-    if !m.isAdding && !m.isDeleting {
+    if !m.isAdding && !m.isDeleting && !m.isEditing {
       switch msg.String() {
 
         case "ctrl+c", "q":
@@ -128,6 +128,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
             cmds = append(cmds, cmd)
           }
 
+        case "c":
+          m.isEditing = true
+          m.textInput.Focus()
+          m.textInput.SetValue(todos[m.cursorRow()].Name)
+          m.textInput.CursorEnd()
+          cmd := m.textInput.Cursor.BlinkCmd()
+          cmds = append(cmds, cmd)
+
         case tea.KeyEnter.String(), " ":
           cmds = append(cmds, toggleTodoCommand(m.Svc, todos[m.cursorRow()]))
 
@@ -136,17 +144,23 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
           m.confirmationModal.Title = "Are you sure you want to delete the item?"
           m.confirmationModal.Body = todos[m.cursorRow()].Name
       }
-    } else if m.isAdding {
+    } else if m.isAdding || m.isEditing {
       switch msg.String() {
         case "ctrl+c":
           return m, tea.Quit
 
         case tea.KeyEscape.String():
           m.isAdding = false
+          m.isEditing = false
 
         case tea.KeyEnter.String():
           m.isAdding = false
-          cmds = append(cmds, addTodoCommand(m.Svc, m.cursorRow(), m.textInput.Value()))
+          m.isEditing = false
+          if initialModel.isAdding {
+            cmds = append(cmds, addTodoCommand(m.Svc, m.cursorRow(), m.textInput.Value()))
+          } else {
+            cmds = append(cmds, changeTodoCommand(m.Svc, todos[m.cursorRow()], m.textInput.Value()))
+          }
       }
     } else {
       switch msg.String() {
@@ -217,7 +231,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
     cmds = append(cmds, cmd)
   }
 
-  if initialModel.isAdding {
+  if initialModel.isAdding || initialModel.isEditing {
     var cmd tea.Cmd
     m.textInput, cmd = m.textInput.Update(msg)
     cmds = append(cmds, cmd)
@@ -241,7 +255,7 @@ func (m Model) View() string {
     return m.confirmationModal.View()
   }
 
-  footer := "\n\n"+style.Muted.Render("Press ? help")
+  footer := "\n\n"+style.Muted.Render("Press ? for help")
   // tabs := m.Tabs.View(int(math.Max(30.0, float64(lipgloss.Width(m.ContentView())))))
   tabs := m.Tabs.View()
 
@@ -265,6 +279,8 @@ func (m Model) ContentView() string {
       if m.Tabs.ActiveIndex == 0 && m.isAdding {
         s += fmt.Sprintf("%s [%s] %s", " ", checked, todo.Name)
         s += "\n" + m.textInput.View()
+      } else if m.isEditing {
+        s += m.textInput.View()
       } else {
         s += style.Highlight.Render(fmt.Sprintf("%s [%s] %s", cursor, checked, todo.Name))
       }
@@ -280,6 +296,13 @@ func addTodoCommand(service *service.Service, index int, name string) tea.Cmd {
   return func() tea.Msg {
     service.AddTodo(index, name)
     return "todo-added"
+  }
+}
+
+func changeTodoCommand(service *service.Service, item repo.Todo, name string) tea.Cmd {
+  return func() tea.Msg {
+    service.ChangeTodo(item, name)
+    return "todo-changed"
   }
 }
 

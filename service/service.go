@@ -63,6 +63,16 @@ func (s *Service) ToggleTodo(item repo.Todo) {
   }
 }
 
+func (s *Service) ChangeTodo(item repo.Todo, name string) {
+  for i, t := range s.repo.Todos {
+    if t.Id == item.Id {
+      s.repo.Todos[i].Name = name
+      s.repo.Persist()
+      break
+    }
+  }
+}
+
 func (s *Service) DeleteTodo(item repo.Todo) {
   indexToDelete := -1
   for i, t := range s.repo.Todos {
