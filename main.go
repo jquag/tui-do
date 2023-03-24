@@ -157,7 +157,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
           m.isAdding = false
           m.isEditing = false
           if initialModel.isAdding {
-            cmds = append(cmds, addTodoCommand(m.Svc, m.cursorRow(), m.textInput.Value()))
+            if len(todos) == 0 {
+              cmds = append(cmds, addTodoCommand(m.Svc, nil, m.textInput.Value()))
+            } else {
+              cmds = append(cmds, addTodoCommand(m.Svc, &todos[m.cursorRow()], m.textInput.Value()))
+            }
           } else {
             cmds = append(cmds, changeTodoCommand(m.Svc, todos[m.cursorRow()], m.textInput.Value()))
           }
@@ -197,14 +201,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
   case string:
     if msg == "todo-added" {
-      m.incCursorRow()
+      if len(todos) > 1 {
+        m.incCursorRow()
+      }
       if (m.cursorRow() >= len(todos)) {
         m.ListViewport.YOffset = m.ListViewport.YOffset + 1
       }
     }
 
     if msg == "todo-toggled" || msg == "todo-deleted" {
-      if (m.cursorRow() >= len(todos)) {
+      if (len(todos) > 0 && m.cursorRow() >= len(todos)) {
         m.decCursorRow()
       }
     }
@@ -256,7 +262,6 @@ func (m Model) View() string {
   }
 
   footer := "\n\n"+style.Muted.Render("Press ? for help")
-  // tabs := m.Tabs.View(int(math.Max(30.0, float64(lipgloss.Width(m.ContentView())))))
   tabs := m.Tabs.View()
 
   return fmt.Sprintf("%s\n\n%s\n%s", tabs, m.ListViewport.View(), footer)
@@ -264,7 +269,17 @@ func (m Model) View() string {
 
 func (m Model) ContentView() string {
   var s string
-  for i, todo := range m.Svc.Todos(m.Tabs.ActiveIndex == 1) {
+  todos := m.Svc.Todos(m.Tabs.ActiveIndex == 1)
+
+  if !m.isAdding && len(todos) == 0 {
+    return style.Muted.Render("No items")
+  }
+
+  if m.isAdding && len(todos) == 0 {
+    return m.textInput.View()
+  }
+
+  for i, todo := range todos {
     cursor := " "
     if m.cursorRow() == i {
       cursor = ">"
@@ -292,9 +307,9 @@ func (m Model) ContentView() string {
   return s
 }
 
-func addTodoCommand(service *service.Service, index int, name string) tea.Cmd {
+func addTodoCommand(service *service.Service, afterItem *repo.Todo, name string) tea.Cmd {
   return func() tea.Msg {
-    service.AddTodo(index, name)
+    service.AddTodo(afterItem, name)
     return "todo-added"
   }
 }

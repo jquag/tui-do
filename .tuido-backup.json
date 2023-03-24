@@ -1,53 +1,74 @@
 [
   {
-    "Id": "560147E4-6CFA-4D46-96C7-A88C0D3DC12C",
-    "Name": "Allow the list to scroll vertical",
-    "Done": true
-  },
-  {
     "Id": "160147E4-6CFA-4D46-96C7-A88C0D3DC12C",
     "Name": "remember scroll poistion",
-    "Done": true
+    "Done": true,
+    "Children": null
   },
   {
     "Id": "260147E4-6CFA-4D46-96C7-A88C0D3DC12C",
-    "Name": "Separate the completed ones",
-    "Done": true
+    "Name": "Separate the completed items",
+    "Done": true,
+    "Children": null
   },
   {
     "Id": "360147E4-6CFA-4D46-96C7-A88C0D3DC12C",
-    "Name": "Allow the list under the cursor to scroll horizontal?"
+    "Name": "Allow the list under the cursor to scroll horizontal?",
+    "Done": true,
+    "Children": null
   },
   {
     "Id": "460147E4-6CFA-4D46-96C7-A88C0D3DC12C",
-    "Name": "Allow adding todos"
+    "Name": "Allow adding todos",
+    "Done": true,
+    "Children": null
   },
   {
     "Id": "660147E4-6CFA-4D46-96C7-A88C0D3DC12C",
-    "Name": "Mark as done/not done"
+    "Name": "Mark as done/not done",
+    "Done": true,
+    "Children": null
   },
   {
     "Id": "760147E4-6CFA-4D46-96C7-A88C0D3DC12C",
-    "Name": "nested items... this is a tough one"
+    "Name": "support nested items",
+    "Done": false,
+    "Children": null
   },
   {
     "Id": "860147E4-6CFA-4D46-96C7-A88C0D3DC12C",
-    "Name": "delete an item"
-  },
-  {
-    "Id": "960147E4-6CFA-4D46-96C7-A88C0D3DC12C",
-    "Name": "cursor bg extend full width"
-  },
-  {
-    "Id": "060147E4-6CFA-4D46-96C7-A88C0D3DC12C",
-    "Name": "make other smaller bubbles for reuse"
+    "Name": "delete an item",
+    "Done": true,
+    "Children": null
   },
   {
     "Id": "500147E4-6CFA-4D46-96C7-A88C0D3DC12C",
-    "Name": "message when list is empty"
+    "Name": "message when list is empty",
+    "Done": false,
+    "Children": null
   },
   {
-    "Id": "510147E4-6CFA-4D46-96C7-A88C0D3DC12C",
-    "Name": "support mouse clicks maybe"
+    "Id": "8e430305-b2f0-45b9-ac02-b5cf39c91677",
+    "Name": "change item name",
+    "Done": true,
+    "Children": null
+  },
+  {
+    "Id": "9d28c361-b67d-4a30-9fce-c321147d93a7",
+    "Name": "help menus",
+    "Done": false,
+    "Children": null
+  },
+  {
+    "Id": "f62c4d2b-4654-4f08-92ff-ad95e9d1f22e",
+    "Name": "put a cursor in the checkbox area",
+    "Done": false,
+    "Children": null
+  },
+  {
+    "Id": "c615806d-834d-4ef8-9401-beb2dff40c9c",
+    "Name": "set the cursor position to the end of the line for edits",
+    "Done": true,
+    "Children": null
   }
 ]
