@@ -18,11 +18,25 @@ func (s *Service) Todos(completeFilter bool) []repo.Todo {
   var filtered []repo.Todo
 
   for _, t := range s.repo.Todos {
-    if t.Done == completeFilter {
+    if s.isAllDone(t) == completeFilter {
       filtered = append(filtered, t)
     }
   }
   return filtered
+}
+
+func (s *Service) isAllDone(item repo.Todo) bool {
+  if len(item.Children) == 0 {
+    return item.Done
+  }
+
+  for _, child := range item.Children {
+    if !s.isAllDone(child) {
+      return false
+    }
+  }
+
+  return true
 }
 
 func (s *Service) AddTodo(afterItem *repo.Todo, name string) {

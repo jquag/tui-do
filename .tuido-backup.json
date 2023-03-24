@@ -1,5 +1,11 @@
 [
   {
+    "Id": "46e99e43-5ed3-4bf6-b346-07665ec3590d",
+    "Name": "insert items",
+    "Done": false,
+    "Children": null
+  },
+  {
     "Id": "160147E4-6CFA-4D46-96C7-A88C0D3DC12C",
     "Name": "remember scroll poistion",
     "Done": true,
@@ -8,12 +14,6 @@
   {
     "Id": "260147E4-6CFA-4D46-96C7-A88C0D3DC12C",
     "Name": "Separate the completed items",
-    "Done": true,
-    "Children": null
-  },
-  {
-    "Id": "360147E4-6CFA-4D46-96C7-A88C0D3DC12C",
-    "Name": "Allow the list under the cursor to scroll horizontal?",
     "Done": true,
     "Children": null
   },
@@ -44,7 +44,7 @@
   {
     "Id": "500147E4-6CFA-4D46-96C7-A88C0D3DC12C",
     "Name": "message when list is empty",
-    "Done": false,
+    "Done": true,
     "Children": null
   },
   {
@@ -60,9 +60,15 @@
     "Children": null
   },
   {
+    "Id": "ed82491c-5f2b-4aa9-b24f-0433904b5fe3",
+    "Name": "add more key mappings for moving in the list like c-d, c-u, G, g, z to center",
+    "Done": false,
+    "Children": null
+  },
+  {
     "Id": "f62c4d2b-4654-4f08-92ff-ad95e9d1f22e",
     "Name": "put a cursor in the checkbox area",
-    "Done": false,
+    "Done": true,
     "Children": null
   },
   {

@@ -8,6 +8,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/jquag/tui-do/bubbles/modal"
 	"github.com/jquag/tui-do/bubbles/tabs"
 	"github.com/jquag/tui-do/repo"
@@ -90,6 +91,7 @@ func (m Model) Init() tea.Cmd {
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
   initialModel := m
   todos := m.Svc.Todos(m.Tabs.ActiveIndex == 1)
+  totalRows := m.countRows(todos)
   skipViewportUpdate := false
   cursorRow := m.cursorRow()
   var cmds []tea.Cmd
@@ -114,7 +116,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
           skipViewportUpdate = cursorRow - m.ListViewport.YOffset >= 2 // b/c cursor is not close to the top
 
         case "down", "j":
-          if cursorRow < len(todos)-1 {
+          if cursorRow < totalRows-1 {
             m.incCursorRow()
           }
           skipViewportUpdate = cursorRow <= m.ListViewport.Height - 3 // b/c cursor is not close to the bottom
@@ -204,13 +206,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
       if len(todos) > 1 {
         m.incCursorRow()
       }
-      if (m.cursorRow() >= len(todos)) {
+      if (m.cursorRow() >= totalRows) {
         m.ListViewport.YOffset = m.ListViewport.YOffset + 1
       }
     }
 
     if msg == "todo-toggled" || msg == "todo-deleted" {
-      if (len(todos) > 0 && m.cursorRow() >= len(todos)) {
+      if (len(todos) > 0 && m.cursorRow() >= totalRows) {
         m.decCursorRow()
       }
     }
@@ -279,35 +281,100 @@ func (m Model) ContentView() string {
     return m.textInput.View()
   }
 
+  visibleChildCount := 0
   for i, todo := range todos {
-    cursor := " "
-    if m.cursorRow() == i {
-      cursor = ">"
-    }
+    s += m.ItemView(todo, visibleChildCount + i, "")
+    visibleChildCount += m.countRows(todo.Children)
+    // cursor := " "
+    // if m.cursorRow() == i {
+    //   cursor = ">"
+    // }
 
-    checked := " "
-    if todo.Done {
-      checked = "x"
-    }
+    // checked := " "
+    // if todo.Done {
+    //   checked = "x"
+    // }
 
-    if m.cursorRow() == i {
-      if m.Tabs.ActiveIndex == 0 && m.isAdding {
-        s += fmt.Sprintf("%s [%s] %s", " ", checked, todo.Name)
-        s += "\n" + m.textInput.View()
-      } else if m.isEditing {
-        s += m.textInput.View()
-      } else {
-        checked = style.CheckBox.Render(checked)
-        preCheckbox := style.Highlight.Render(fmt.Sprintf("%s [", cursor))
-        postCheckbox := style.Highlight.Render(fmt.Sprintf("] %s", todo.Name))
-        s += style.Highlight.Render(fmt.Sprintf("%s%s%s", preCheckbox, checked, postCheckbox))
-      }
-    } else {
-      s += fmt.Sprintf("%s [%s] %s", cursor, checked, todo.Name)
-    }
-    s += "\n"
+    // if m.cursorRow() == i {
+    //   if m.Tabs.ActiveIndex == 0 && m.isAdding {
+    //     s += fmt.Sprintf("%s [%s] %s", " ", checked, todo.Name)
+    //     s += "\n" + m.textInput.View()
+    //   } else if m.isEditing {
+    //     s += m.textInput.View()
+    //   } else {
+    //     checked = style.CheckBox.Render(checked)
+    //     preCheckbox := style.Highlight.Render(fmt.Sprintf("%s [", cursor))
+    //     postCheckbox := style.Highlight.Render(fmt.Sprintf("] %s", todo.Name))
+    //     s += style.Highlight.Render(fmt.Sprintf("%s%s%s", preCheckbox, checked, postCheckbox))
+    //   }
+    // } else {
+    //   s += fmt.Sprintf("%s [%s] %s", cursor, checked, todo.Name)
+    // }
+    // s += "\n"
   }
   return s
+}
+
+func (m Model) ItemView(item repo.Todo, i int, padding string) string {
+  var s string
+
+  hasChildren := len(item.Children) > 0
+
+  cursor := " "
+  if m.cursorRow() == i {
+    cursor = ">"
+  }
+  cursor += padding
+  cursor = padding
+
+  var prefix string
+  outerStyle := lipgloss.NewStyle().Inherit(style.Muted)
+  innerStyle := lipgloss.NewStyle()
+  if m.cursorRow() == i && !m.isAdding {
+    outerStyle = style.Muted.Copy().Inherit(style.Highlight)
+    innerStyle = style.CheckBox
+  }
+  if hasChildren {
+    prefix = fmt.Sprintf("%s%s%s", outerStyle.Render(" "), innerStyle.Render("─"), outerStyle.Render(" "))
+  } else {
+    checked := " "
+    if item.Done {
+      checked = "x"
+    }
+    prefix = fmt.Sprintf("%s%s%s", outerStyle.Render("["), innerStyle.Render(checked), outerStyle.Render("]"))
+  }
+
+  if m.cursorRow() == i {
+    if m.Tabs.ActiveIndex == 0 && m.isAdding {
+      s += fmt.Sprintf("%s %s %s", "", prefix, item.Name)
+      s += "\n" + m.textInput.View()
+    } else if m.isEditing {
+      s += m.textInput.View()
+    } else {
+      prePrefix := style.Highlight.Render(fmt.Sprintf("%s ", cursor))
+      postPrefix := style.Highlight.Render(fmt.Sprintf(" %s", item.Name))
+      s += fmt.Sprintf("%s%s%s", prePrefix, prefix, postPrefix)
+    }
+  } else {
+    s += fmt.Sprintf("%s %s %s", cursor, prefix, item.Name)
+  }
+  s += "\n"
+
+  if hasChildren {
+    for ci, child := range item.Children {
+      s += m.ItemView(child, ci + i + 1, padding + "    ")
+    }
+  }
+
+  return s
+}
+
+func (m Model) countRows(items []repo.Todo) int {
+  c := len(items)
+  for _, item := range items {
+    c += m.countRows(item.Children)
+  }
+  return c
 }
 
 func addTodoCommand(service *service.Service, afterItem *repo.Todo, name string) tea.Cmd {

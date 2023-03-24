@@ -33,7 +33,39 @@
     "Id": "760147E4-6CFA-4D46-96C7-A88C0D3DC12C",
     "Name": "support nested items",
     "Done": false,
-    "Children": null
+    "Children": [
+      {
+        "Id": "760147E4-6CFA-4D46-96C7-ALKJ983DC12C",
+        "Name": "Display nested items",
+        "Done": true,
+        "Children": null
+      },
+      {
+        "Id": "760147E4-6CFA-4D46-96C7-ALKJ983DC12A",
+        "Name": "Only move fully completed items to the complete tab",
+        "Done": false,
+        "Children": null
+      },
+      {
+        "Id": "760157E4-6CFA-4D46-96C7-ALKJ983DC12C",
+        "Name": "Implement the expand and collapse",
+        "Done": false,
+        "Children": [
+          {
+            "Id": "760157E4-6CFA-4D46-96C7-BJKJ983DC12C",
+            "Name": "start with all collapsed",
+            "Done": false,
+            "Children": null
+          },
+          {
+            "Id": "764157E4-6CFA-4D46-96C7-BJKJ983DC12C",
+            "Name": "toggle collapsed state",
+            "Done": false,
+            "Children": null
+          }
+        ]
+      }
+    ]
   },
   {
     "Id": "860147E4-6CFA-4D46-96C7-A88C0D3DC12C",
@@ -61,7 +93,7 @@
   },
   {
     "Id": "ed82491c-5f2b-4aa9-b24f-0433904b5fe3",
-    "Name": "add more key mappings for moving in the list like c-d, c-u, G, g",
+    "Name": "add more key mappings for moving in the list like c-d, c-u, G, g, z to center",
     "Done": false,
     "Children": null
   },
