@@ -68,13 +68,23 @@ func (s *Service) AddTodo(afterItem *repo.Todo, name string) {
 }
 
 func (s *Service) ToggleTodo(item repo.Todo) {
-  for i, t := range s.repo.Todos {
+  s.toggleTodoFromSlice(item, s.repo.Todos)
+}
+
+func (s *Service) toggleTodoFromSlice(item repo.Todo, scope []repo.Todo) (bool) {
+  for i, t := range scope {
     if t.Id == item.Id {
-      s.repo.Todos[i].Done = !t.Done
+      scope[i].Done = !t.Done
       s.repo.Persist()
-      break
+      return true
+    } else {
+      done := s.toggleTodoFromSlice(item, t.Children)
+      if done {
+        return done
+      }
     }
   }
+  return false
 }
 
 func (s *Service) ChangeTodo(item repo.Todo, name string) {

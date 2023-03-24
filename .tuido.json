@@ -43,7 +43,13 @@
       {
         "Id": "760147E4-6CFA-4D46-96C7-ALKJ983DC12A",
         "Name": "Only move fully completed items to the complete tab",
-        "Done": false,
+        "Done": true,
+        "Children": null
+      },
+      {
+        "Id": "760147TY-6CFA-4D46-96C7-ALKJ983DC12A",
+        "Name": "Fix toggling todos when there is nesting",
+        "Done": true,
         "Children": null
       },
       {

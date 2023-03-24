@@ -139,7 +139,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
           cmds = append(cmds, cmd)
 
         case tea.KeyEnter.String(), " ":
-          cmds = append(cmds, toggleTodoCommand(m.Svc, todos[m.cursorRow()]))
+          currentItem, _ := m.itemAtIndex(todos, m.cursorRow(), 0)
+          cmds = append(cmds, toggleTodoCommand(m.Svc, *currentItem))
 
         case "d":
           m.isDeleting = true
@@ -285,32 +286,6 @@ func (m Model) ContentView() string {
   for i, todo := range todos {
     s += m.ItemView(todo, visibleChildCount + i, "")
     visibleChildCount += m.countRows(todo.Children)
-    // cursor := " "
-    // if m.cursorRow() == i {
-    //   cursor = ">"
-    // }
-
-    // checked := " "
-    // if todo.Done {
-    //   checked = "x"
-    // }
-
-    // if m.cursorRow() == i {
-    //   if m.Tabs.ActiveIndex == 0 && m.isAdding {
-    //     s += fmt.Sprintf("%s [%s] %s", " ", checked, todo.Name)
-    //     s += "\n" + m.textInput.View()
-    //   } else if m.isEditing {
-    //     s += m.textInput.View()
-    //   } else {
-    //     checked = style.CheckBox.Render(checked)
-    //     preCheckbox := style.Highlight.Render(fmt.Sprintf("%s [", cursor))
-    //     postCheckbox := style.Highlight.Render(fmt.Sprintf("] %s", todo.Name))
-    //     s += style.Highlight.Render(fmt.Sprintf("%s%s%s", preCheckbox, checked, postCheckbox))
-    //   }
-    // } else {
-    //   s += fmt.Sprintf("%s [%s] %s", cursor, checked, todo.Name)
-    // }
-    // s += "\n"
   }
   return s
 }
@@ -375,6 +350,26 @@ func (m Model) countRows(items []repo.Todo) int {
     c += m.countRows(item.Children)
   }
   return c
+}
+
+func (m Model) itemAtIndex(items []repo.Todo, index int, startingAt int) (*repo.Todo, int) {
+  if len(items) == 0 {
+    return nil, startingAt
+  }
+
+  i := startingAt
+  for _, item := range items {
+    if index == i {
+      return &item, index 
+    }
+    found, lastIndexChecked := m.itemAtIndex(item.Children, index, i + 1)
+    if (found != nil) {
+      return found, index
+    }
+    i = lastIndexChecked
+  }
+
+  return nil, i
 }
 
 func addTodoCommand(service *service.Service, afterItem *repo.Todo, name string) tea.Cmd {
