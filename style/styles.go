@@ -62,4 +62,6 @@ var TabFiller = lipgloss.NewStyle().
 var Muted = lipgloss.NewStyle().Foreground(lipgloss.Color("#595959"))
 
 var ModalBox = lipgloss.NewStyle().Padding(0, 2).Border(lipgloss.NormalBorder(), true).BorderForeground(lipgloss.Color("#a0c278"))
-var ModalTitle = lipgloss.NewStyle().Foreground(lipgloss.Color("#a0c278")).Bold(true)
+var ModalTitle = lipgloss.NewStyle().Foreground(lipgloss.Color("#87a987")).Bold(true)
+
+var CheckBox = lipgloss.NewStyle().Background(lipgloss.Color("#ffcbcd")).Foreground(lipgloss.Color("#1c1e21"))

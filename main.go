@@ -297,7 +297,10 @@ func (m Model) ContentView() string {
       } else if m.isEditing {
         s += m.textInput.View()
       } else {
-        s += style.Highlight.Render(fmt.Sprintf("%s [%s] %s", cursor, checked, todo.Name))
+        checked = style.CheckBox.Render(checked)
+        preCheckbox := style.Highlight.Render(fmt.Sprintf("%s [", cursor))
+        postCheckbox := style.Highlight.Render(fmt.Sprintf("] %s", todo.Name))
+        s += style.Highlight.Render(fmt.Sprintf("%s%s%s", preCheckbox, checked, postCheckbox))
       }
     } else {
       s += fmt.Sprintf("%s [%s] %s", cursor, checked, todo.Name)

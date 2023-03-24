@@ -60,9 +60,15 @@
     "Children": null
   },
   {
+    "Id": "ed82491c-5f2b-4aa9-b24f-0433904b5fe3",
+    "Name": "add more key mappings for moving in the list like c-d, c-u, G, g",
+    "Done": false,
+    "Children": null
+  },
+  {
     "Id": "f62c4d2b-4654-4f08-92ff-ad95e9d1f22e",
     "Name": "put a cursor in the checkbox area",
-    "Done": false,
+    "Done": true,
     "Children": null
   },
   {
