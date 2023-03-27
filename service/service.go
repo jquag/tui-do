@@ -48,23 +48,60 @@ func (s *Service) AddTodo(afterItem *repo.Todo, name string) {
   if afterItem == nil {
     s.repo.Todos = append([]repo.Todo{t}, s.repo.Todos...)
   } else {
+    children := s.repo.Todos
+    parent := s.findParent(afterItem.Id, nil)
+    if parent != nil {
+      children = parent.Children
+    }
+
     index := -1 
-    for i, item := range s.repo.Todos {
+    for i, item := range children {
       if item.Id == afterItem.Id {
         index = i + 1
       }
     }
     if index == -1 {
-      s.repo.Todos = append([]repo.Todo{t}, s.repo.Todos...)
-    } else if index >= len(s.repo.Todos) {
-      s.repo.Todos = append(s.repo.Todos, t)
+      if parent == nil {
+        s.repo.Todos = append([]repo.Todo{t}, s.repo.Todos...)
+      } else {
+        parent.Children = append([]repo.Todo{t}, parent.Children...)
+      }
+    } else if index >= len(children) {
+      if parent == nil {
+        s.repo.Todos = append(s.repo.Todos, t)
+      } else {
+        parent.Children = append(parent.Children, t)
+      }
     } else {
-      s.repo.Todos = append(s.repo.Todos[:index+1], s.repo.Todos[index:]...)
-      s.repo.Todos[index] = t
+      if parent == nil {
+        s.repo.Todos = append(s.repo.Todos[:index+1], s.repo.Todos[index:]...)
+        s.repo.Todos[index] = t
+      } else {
+        parent.Children = append(parent.Children[:index+1], parent.Children[index:]...)
+        parent.Children[index] = t
+      }
     }
   }
 
   s.repo.Persist()
+}
+
+func (s *Service) findParent(itemId string, currentParent *repo.Todo) *repo.Todo {
+  children := s.repo.Todos
+  if currentParent != nil {
+    children = currentParent.Children
+  }
+
+  for i, child := range children {
+    if child.Id == itemId {
+      return currentParent
+    }
+    parent := s.findParent(itemId, &children[i])
+    if parent != nil {
+      return parent
+    }
+  }
+  return nil
 }
 
 func (s *Service) ToggleTodo(item repo.Todo) {

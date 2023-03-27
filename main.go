@@ -76,6 +76,7 @@ func initialModel() Model {
   ti := textinput.New()
 	ti.Width = 20
   ti.Cursor.SetMode(cursor.CursorBlink)
+  ti.Prompt = ">  "
 
   return Model{
     Svc: s,
@@ -163,7 +164,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
             if len(todos) == 0 {
               cmds = append(cmds, addTodoCommand(m.Svc, nil, m.textInput.Value()))
             } else {
-              cmds = append(cmds, addTodoCommand(m.Svc, &todos[m.cursorRow()], m.textInput.Value()))
+              currentItem, _ := m.itemAtIndex(todos, m.cursorRow(), 0)
+              cmds = append(cmds, addTodoCommand(m.Svc, currentItem, m.textInput.Value()))
             }
           } else {
             cmds = append(cmds, changeTodoCommand(m.Svc, todos[m.cursorRow()], m.textInput.Value()))
@@ -284,28 +286,23 @@ func (m Model) ContentView() string {
 
   visibleChildCount := 0
   for i, todo := range todos {
-    s += m.ItemView(todo, visibleChildCount + i, "")
+    itemString, _ := m.ItemView(todo, visibleChildCount + i, "")
+    s += itemString
     visibleChildCount += m.countRows(todo.Children)
   }
   return s
 }
 
-func (m Model) ItemView(item repo.Todo, i int, padding string) string {
+func (m Model) ItemView(item repo.Todo, index int, padding string) (string, int) {
   var s string
 
   hasChildren := len(item.Children) > 0
-
-  cursor := " "
-  if m.cursorRow() == i {
-    cursor = ">"
-  }
-  cursor += padding
-  cursor = padding
+  isCurrentRow := m.cursorRow() == index
 
   var prefix string
   outerStyle := lipgloss.NewStyle().Inherit(style.Muted)
   innerStyle := lipgloss.NewStyle()
-  if m.cursorRow() == i && !m.isAdding {
+  if isCurrentRow && !m.isAdding {
     outerStyle = style.Muted.Copy().Inherit(style.Highlight)
     innerStyle = style.CheckBox
   }
@@ -319,29 +316,38 @@ func (m Model) ItemView(item repo.Todo, i int, padding string) string {
     prefix = fmt.Sprintf("%s%s%s", outerStyle.Render("["), innerStyle.Render(checked), outerStyle.Render("]"))
   }
 
-  if m.cursorRow() == i {
+  if isCurrentRow {
     if m.Tabs.ActiveIndex == 0 && m.isAdding {
-      s += fmt.Sprintf("%s %s %s", "", prefix, item.Name)
-      s += "\n" + m.textInput.View()
+      s += fmt.Sprintf("%s %s %s", padding, prefix, item.Name)
+      if !hasChildren {
+        s += "\n  " + padding + m.textInput.View()
+      }
     } else if m.isEditing {
       s += m.textInput.View()
     } else {
-      prePrefix := style.Highlight.Render(fmt.Sprintf("%s ", cursor))
+      prePrefix := style.Highlight.Render(fmt.Sprintf("%s ", padding))
       postPrefix := style.Highlight.Render(fmt.Sprintf(" %s", item.Name))
       s += fmt.Sprintf("%s%s%s", prePrefix, prefix, postPrefix)
     }
   } else {
-    s += fmt.Sprintf("%s %s %s", cursor, prefix, item.Name)
+    s += fmt.Sprintf("%s %s %s", padding, prefix, item.Name)
   }
+
   s += "\n"
 
   if hasChildren {
-    for ci, child := range item.Children {
-      s += m.ItemView(child, ci + i + 1, padding + "    ")
+    for _, child := range item.Children {
+      var childString string
+      childString, index = m.ItemView(child, index + 1, padding + "    ")
+      s += childString
     }
   }
 
-  return s
+  if isCurrentRow && m.Tabs.ActiveIndex == 0 && m.isAdding && hasChildren {
+    s += "  " + padding + m.textInput.View() + "\n"
+  }
+
+  return s, index
 }
 
 func (m Model) countRows(items []repo.Todo) int {

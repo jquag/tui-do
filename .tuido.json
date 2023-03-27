@@ -53,6 +53,18 @@
         "Children": null
       },
       {
+        "Id": "e53a3356-e066-410f-8f51-867d996eb020",
+        "Name": "adding nested items",
+        "Done": true,
+        "Children": null
+      },
+      {
+        "Id": "ce39a0fe-a482-4085-9e48-db9ee4661590",
+        "Name": "deleting nested items",
+        "Done": false,
+        "Children": null
+      },
+      {
         "Id": "760157E4-6CFA-4D46-96C7-ALKJ983DC12C",
         "Name": "Implement the expand and collapse",
         "Done": false,
@@ -70,8 +82,20 @@
             "Children": null
           }
         ]
+      },
+      {
+        "Id": "77d6ad2a-fdb7-4bb3-afae-098eb06d4fba",
+        "Name": "this one looks a little confusing",
+        "Done": false,
+        "Children": null
       }
     ]
+  },
+  {
+    "Id": "02362c29-d9f1-44a3-987f-60bf1498ec25",
+    "Name": "finally, this looks better",
+    "Done": false,
+    "Children": null
   },
   {
     "Id": "860147E4-6CFA-4D46-96C7-A88C0D3DC12C",
