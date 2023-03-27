@@ -10,6 +10,7 @@ type Todo struct {
   Id string
   Name string
   Done bool
+  Expanded bool
   Children []Todo
 }
 

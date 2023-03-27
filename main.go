@@ -141,7 +141,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
           cmds = append(cmds, cmd)
 
         case tea.KeyEnter.String(), " ":
-          cmds = append(cmds, toggleTodoCommand(m.Svc, *currentItem))
+          if len(currentItem.Children) > 0 {
+            cmds = append(cmds, toggleExpandedCommand(m.Svc, *currentItem))
+          } else {
+            cmds = append(cmds, toggleTodoCommand(m.Svc, *currentItem))
+          }
 
         case "d":
           m.isDeleting = true
@@ -283,11 +287,12 @@ func (m Model) ContentView() string {
     return m.textInput.View()
   }
 
-  visibleChildCount := 0
-  for i, todo := range todos {
-    itemString, _ := m.ItemView(todo, visibleChildCount + i, "")
+  index := 0
+  for _, todo := range todos {
+    var itemString string
+    itemString, index = m.ItemView(todo, index, "")
+    index++
     s += itemString
-    visibleChildCount += m.countRows(todo.Children)
   }
   return s
 }
@@ -306,7 +311,11 @@ func (m Model) ItemView(item repo.Todo, index int, padding string) (string, int)
     innerStyle = style.CheckBox
   }
   if hasChildren {
-    prefix = fmt.Sprintf("%s%s%s", outerStyle.Render(" "), innerStyle.Render("─"), outerStyle.Render(" "))
+    symbol := "+"
+    if item.Expanded {
+      symbol = "-"
+    }
+    prefix = fmt.Sprintf("%s%s%s", outerStyle.Render(" "), innerStyle.Render(symbol), outerStyle.Render(" "))
   } else {
     checked := " "
     if item.Done {
@@ -334,7 +343,7 @@ func (m Model) ItemView(item repo.Todo, index int, padding string) (string, int)
 
   s += "\n"
 
-  if hasChildren {
+  if hasChildren && item.Expanded {
     for _, child := range item.Children {
       var childString string
       childString, index = m.ItemView(child, index + 1, padding + "    ")
@@ -352,7 +361,9 @@ func (m Model) ItemView(item repo.Todo, index int, padding string) (string, int)
 func (m Model) countRows(items []repo.Todo) int {
   c := len(items)
   for _, item := range items {
-    c += m.countRows(item.Children)
+    if item.Expanded {
+      c += m.countRows(item.Children)
+    }
   }
   return c
 }
@@ -367,11 +378,15 @@ func (m Model) itemAtIndex(items []repo.Todo, index int, startingAt int) (*repo.
     if index == i {
       return &item, index 
     }
-    found, lastIndexChecked := m.itemAtIndex(item.Children, index, i + 1)
-    if (found != nil) {
-      return found, index
+    if item.Expanded {
+      found, lastIndexChecked := m.itemAtIndex(item.Children, index, i + 1)
+      if (found != nil) {
+        return found, index
+      }
+      i = lastIndexChecked
+    } else {
+      i++
     }
-    i = lastIndexChecked
   }
 
   return nil, i
@@ -395,6 +410,13 @@ func toggleTodoCommand(service *service.Service, item repo.Todo) tea.Cmd {
   return func() tea.Msg {
     service.ToggleTodo(item)
     return "todo-toggled"
+  }
+}
+
+func toggleExpandedCommand(service *service.Service, item repo.Todo) tea.Cmd {
+  return func() tea.Msg {
+    service.ToggleExpanded(item)
+    return "todo-expand-toggled"
   }
 }
 

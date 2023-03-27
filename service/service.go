@@ -124,6 +124,26 @@ func (s *Service) toggleTodoFromSlice(item repo.Todo, scope []repo.Todo) (bool) 
   return false
 }
 
+func (s *Service) ToggleExpanded(item repo.Todo) {
+  s.toggleExpandedFromSlice(item, s.repo.Todos)
+}
+
+func (s *Service) toggleExpandedFromSlice(item repo.Todo, scope []repo.Todo) (bool) {
+  for i, t := range scope {
+    if t.Id == item.Id {
+      scope[i].Expanded = !t.Expanded
+      s.repo.Persist()
+      return true
+    } else {
+      done := s.toggleExpandedFromSlice(item, t.Children)
+      if done {
+        return done
+      }
+    }
+  }
+  return false
+}
+
 func (s *Service) ChangeTodo(item repo.Todo, name string) {
   s.changeTodoFromSlice(item, name, s.repo.Todos)
 }
