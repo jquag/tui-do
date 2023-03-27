@@ -125,23 +125,58 @@ func (s *Service) toggleTodoFromSlice(item repo.Todo, scope []repo.Todo) (bool) 
 }
 
 func (s *Service) ChangeTodo(item repo.Todo, name string) {
-  for i, t := range s.repo.Todos {
+  s.changeTodoFromSlice(item, name, s.repo.Todos)
+}
+
+func (s *Service) changeTodoFromSlice(item repo.Todo, name string, scope []repo.Todo) (bool) {
+  for i, t := range scope {
     if t.Id == item.Id {
-      s.repo.Todos[i].Name = name
+      scope[i].Name = name
       s.repo.Persist()
-      break
+      return true
+    } else {
+      done := s.changeTodoFromSlice(item, name, t.Children)
+      if done {
+        return done
+      }
     }
   }
+  return false
 }
 
 func (s *Service) DeleteTodo(item repo.Todo) {
+  s.deleteTodoFromParent(item, nil)
+}
+
+func (s *Service) deleteTodoFromParent(item repo.Todo, parent *repo.Todo) (bool) {
   indexToDelete := -1
-  for i, t := range s.repo.Todos {
+  scope := s.repo.Todos
+  if parent != nil {
+    scope = parent.Children
+  }
+
+  for i := range scope {
+    t := &scope[i]
     if t.Id == item.Id {
       indexToDelete = i
       break
+    } else {
+      done := s.deleteTodoFromParent(item, t)
+      if done {
+        return done
+      }
     }
   }
-  s.repo.Todos = append(s.repo.Todos[:indexToDelete], s.repo.Todos[indexToDelete+1:]...)
-  s.repo.Persist()
+
+  if indexToDelete != -1 {
+    if parent == nil {
+      s.repo.Todos = append(s.repo.Todos[:indexToDelete], s.repo.Todos[indexToDelete+1:]...)
+    } else {
+      parent.Children = append(parent.Children[:indexToDelete], parent.Children[indexToDelete+1:]...)
+    }
+    s.repo.Persist()
+    return true
+  }
+
+  return false
 }

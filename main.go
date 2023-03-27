@@ -146,7 +146,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
         case "d":
           m.isDeleting = true
           m.confirmationModal.Title = "Are you sure you want to delete the item?"
-          m.confirmationModal.Body = todos[m.cursorRow()].Name
+          m.confirmationModal.Body = currentItem.Name
       }
     } else if m.isAdding || m.isEditing {
       switch msg.String() {
@@ -222,7 +222,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
   case modal.ModalMsg:
     if msg == modal.Confirmed {
       m.isDeleting = false
-      cmds = append(cmds, deleteTodoCommand(m.Svc, todos[m.cursorRow()]))
+      cmds = append(cmds, deleteTodoCommand(m.Svc, *currentItem))
     } else if msg == modal.Cancelled {
       m.isDeleting = false
     }
