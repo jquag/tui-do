@@ -101,6 +101,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
   m.Tabs, cmd = m.Tabs.Update(msg)
   cmds = append(cmds, cmd)
   tabChanged := initialModel.Tabs.ActiveIndex != m.Tabs.ActiveIndex
+  currentItem, _ := m.itemAtIndex(todos, m.cursorRow(), 0)
 
   switch msg := msg.(type) {
   case tea.KeyMsg:
@@ -134,13 +135,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
         case "c":
           m.isEditing = true
           m.textInput.Focus()
-          m.textInput.SetValue(todos[m.cursorRow()].Name)
+          m.textInput.SetValue(currentItem.Name)
           m.textInput.CursorEnd()
           cmd := m.textInput.Cursor.BlinkCmd()
           cmds = append(cmds, cmd)
 
         case tea.KeyEnter.String(), " ":
-          currentItem, _ := m.itemAtIndex(todos, m.cursorRow(), 0)
           cmds = append(cmds, toggleTodoCommand(m.Svc, *currentItem))
 
         case "d":
@@ -164,11 +164,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
             if len(todos) == 0 {
               cmds = append(cmds, addTodoCommand(m.Svc, nil, m.textInput.Value()))
             } else {
-              currentItem, _ := m.itemAtIndex(todos, m.cursorRow(), 0)
               cmds = append(cmds, addTodoCommand(m.Svc, currentItem, m.textInput.Value()))
             }
           } else {
-            cmds = append(cmds, changeTodoCommand(m.Svc, todos[m.cursorRow()], m.textInput.Value()))
+            cmds = append(cmds, changeTodoCommand(m.Svc, *currentItem, m.textInput.Value()))
           }
       }
     } else {
@@ -323,7 +322,7 @@ func (m Model) ItemView(item repo.Todo, index int, padding string) (string, int)
         s += "\n  " + padding + m.textInput.View()
       }
     } else if m.isEditing {
-      s += m.textInput.View()
+      s += "  " + padding + m.textInput.View()
     } else {
       prePrefix := style.Highlight.Render(fmt.Sprintf("%s ", padding))
       postPrefix := style.Highlight.Render(fmt.Sprintf(" %s", item.Name))

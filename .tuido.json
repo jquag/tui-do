@@ -59,6 +59,12 @@
         "Children": null
       },
       {
+        "Id": "5ef89c1b-6b86-4e80-832e-ea215be555f6",
+        "Name": "changing nested items",
+        "Done": true,
+        "Children": null
+      },
+      {
         "Id": "ce39a0fe-a482-4085-9e48-db9ee4661590",
         "Name": "deleting nested items",
         "Done": false,
@@ -94,6 +100,12 @@
   {
     "Id": "02362c29-d9f1-44a3-987f-60bf1498ec25",
     "Name": "finally, this looks better",
+    "Done": false,
+    "Children": null
+  },
+  {
+    "Id": "94ec6430-dcdb-4251-b2c1-54e3b993194f",
+    "Name": "add more colors: bold folders, blue for interactive pieces, dim completed",
     "Done": false,
     "Children": null
   },
