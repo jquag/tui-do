@@ -36,8 +36,10 @@ var tabFillerBorder = lipgloss.Border{
 }
 
 var Highlight = lipgloss.NewStyle().
-  Background(lipgloss.Color("#af8c8c")).
-  Foreground(lipgloss.Color("#060606"))
+  // Background(lipgloss.Color("#af8c8c")).
+  Background(lipgloss.Color("#353535"))
+  // Foreground(lipgloss.Color("#060606"))
+  // Foreground(lipgloss.Color("#060606"))
 
 
 var Card = lipgloss.NewStyle().Padding(0, 1).Border(lipgloss.NormalBorder(), false)
@@ -64,4 +66,8 @@ var Muted = lipgloss.NewStyle().Foreground(lipgloss.Color("#595959"))
 var ModalBox = lipgloss.NewStyle().Padding(0, 2).Border(lipgloss.NormalBorder(), true).BorderForeground(lipgloss.Color("#a0c278"))
 var ModalTitle = lipgloss.NewStyle().Foreground(lipgloss.Color("#87a987")).Bold(true)
 
-var CheckBox = lipgloss.NewStyle().Background(lipgloss.Color("#ffcbcd")).Foreground(lipgloss.Color("#1c1e21"))
+var CheckBox = lipgloss.NewStyle().Background(lipgloss.Color("#ffcbcd")).Foreground(lipgloss.Color("#151837"))
+
+var CheckBoxBracket = lipgloss.NewStyle().Foreground(lipgloss.Color("#4850be"))
+var ActionStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#6c76f7"))
+var ParentColor = lipgloss.NewStyle().Foreground(lipgloss.Color("#87a987"))

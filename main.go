@@ -77,6 +77,8 @@ func initialModel() Model {
 	ti.Width = 20
   ti.Cursor.SetMode(cursor.CursorBlink)
   ti.Prompt = ">  "
+  ti.TextStyle = style.ActionStyle
+  ti.PromptStyle = ti.PromptStyle.Inherit(style.ActionStyle)
 
   return Model{
     Svc: s,
@@ -304,13 +306,15 @@ func (m Model) ItemView(item repo.Todo, index int, padding string) (string, int)
   isCurrentRow := m.cursorRow() == index
 
   var prefix string
-  outerStyle := lipgloss.NewStyle().Inherit(style.Muted)
-  innerStyle := lipgloss.NewStyle()
+  outerStyle := lipgloss.NewStyle().Inherit(style.CheckBoxBracket)
+  innerStyle := lipgloss.NewStyle().Inherit(style.ActionStyle)
+  nameStyle := lipgloss.NewStyle().Bold(hasChildren)
   if isCurrentRow && !m.isAdding {
-    outerStyle = style.Muted.Copy().Inherit(style.Highlight)
-    innerStyle = style.CheckBox
+    outerStyle = style.CheckBoxBracket.Copy().Inherit(style.Highlight)
+    innerStyle = style.CheckBox.Copy()
   }
   if hasChildren {
+    nameStyle.Inherit(style.ParentColor)
     symbol := "+"
     if item.Expanded {
       symbol = "-"
@@ -326,7 +330,7 @@ func (m Model) ItemView(item repo.Todo, index int, padding string) (string, int)
 
   if isCurrentRow {
     if m.Tabs.ActiveIndex == 0 && m.isAdding {
-      s += fmt.Sprintf("%s %s %s", padding, prefix, item.Name)
+      s += fmt.Sprintf("%s %s %s", padding, prefix, nameStyle.Render(item.Name))
       if !hasChildren {
         s += "\n  " + padding + m.textInput.View()
       }
@@ -334,11 +338,11 @@ func (m Model) ItemView(item repo.Todo, index int, padding string) (string, int)
       s += "  " + padding + m.textInput.View()
     } else {
       prePrefix := style.Highlight.Render(fmt.Sprintf("%s ", padding))
-      postPrefix := style.Highlight.Render(fmt.Sprintf(" %s", item.Name))
+      postPrefix := style.Highlight.Render(fmt.Sprintf(" %s", nameStyle.Render(item.Name)))
       s += fmt.Sprintf("%s%s%s", prePrefix, prefix, postPrefix)
     }
   } else {
-    s += fmt.Sprintf("%s %s %s", padding, prefix, item.Name)
+    s += fmt.Sprintf("%s %s %s", padding, prefix, nameStyle.Render(item.Name))
   }
 
   s += "\n"
