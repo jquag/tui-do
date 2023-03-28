@@ -31,7 +31,7 @@
     "Id": "760147E4-6CFA-4D46-96C7-A88C0D3DC12C",
     "Name": "support nested items",
     "Done": false,
-    "Expanded": true,
+    "Expanded": false,
     "Children": [
       {
         "Id": "760147E4-6CFA-4D46-96C7-ALKJ983DC12C",
@@ -127,6 +127,13 @@
     "Children": null
   },
   {
+    "Id": "01de18a0-6c68-4273-8f38-c31c3c711f0a",
+    "Name": "mute completed items",
+    "Done": true,
+    "Expanded": false,
+    "Children": null
+  },
+  {
     "Id": "cfe1787c-817c-417c-a95a-8278d1320f87",
     "Name": "future ideas (do these after using it for a while)",
     "Done": false,
@@ -170,6 +177,34 @@
       {
         "Id": "1c602bf6-7ca4-4f77-9bf8-00f0268b5bc4",
         "Name": "add more movement keys",
+        "Done": false,
+        "Expanded": false,
+        "Children": null
+      },
+      {
+        "Id": "ade3c903-d16e-46d6-a437-c7791fdc979e",
+        "Name": "support using the mouse to move the selection",
+        "Done": false,
+        "Expanded": false,
+        "Children": null
+      },
+      {
+        "Id": "308ce826-5689-4ae6-ab44-9aa0babea630",
+        "Name": "mouse double click for toggling",
+        "Done": false,
+        "Expanded": false,
+        "Children": null
+      },
+      {
+        "Id": "04dfdbed-a303-47d7-a849-bc6fc63f0c6b",
+        "Name": "add a toast type message when items are moved after toggle",
+        "Done": false,
+        "Expanded": false,
+        "Children": null
+      },
+      {
+        "Id": "2390e3c4-5b1b-4720-a2fe-ee19a71cb013",
+        "Name": "backspace to close inner folder",
         "Done": false,
         "Expanded": false,
         "Children": null
