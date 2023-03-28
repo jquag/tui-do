@@ -308,7 +308,7 @@ func (m Model) ItemView(item repo.Todo, index int, padding string) (string, int)
   var prefix string
   outerStyle := lipgloss.NewStyle().Inherit(style.CheckBoxBracket)
   innerStyle := lipgloss.NewStyle().Inherit(style.ActionStyle)
-  nameStyle := lipgloss.NewStyle().Bold(hasChildren)
+  nameStyle := lipgloss.NewStyle().Bold(false)
   if isCurrentRow && !m.isAdding {
     outerStyle = style.CheckBoxBracket.Copy().Inherit(style.Highlight)
     innerStyle = style.CheckBox.Copy()

@@ -54,7 +54,8 @@ var TabActive = lipgloss.NewStyle().
 var TabInactive = lipgloss.NewStyle().
   Border(tabInactiveBorder, true).
   Padding(0, 1).
-  BorderForeground(lipgloss.Color("#595959"))
+  BorderForeground(lipgloss.Color("#595959")).
+  Inherit(Muted)
 
 var TabFiller = lipgloss.NewStyle().
   Border(tabFillerBorder, true).
@@ -68,6 +69,6 @@ var ModalTitle = lipgloss.NewStyle().Foreground(lipgloss.Color("#87a987")).Bold(
 
 var CheckBox = lipgloss.NewStyle().Background(lipgloss.Color("#ffcbcd")).Foreground(lipgloss.Color("#151837"))
 
-var CheckBoxBracket = lipgloss.NewStyle().Foreground(lipgloss.Color("#4850be"))
-var ActionStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#6c76f7"))
+var CheckBoxBracket = lipgloss.NewStyle().Foreground(lipgloss.Color("#deae81"))
+var ActionStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#00b1ff"))
 var ParentColor = lipgloss.NewStyle().Foreground(lipgloss.Color("#87a987"))

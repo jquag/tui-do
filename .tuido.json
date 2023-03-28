@@ -31,7 +31,7 @@
     "Id": "760147E4-6CFA-4D46-96C7-A88C0D3DC12C",
     "Name": "support nested items",
     "Done": false,
-    "Expanded": false,
+    "Expanded": true,
     "Children": [
       {
         "Id": "760147E4-6CFA-4D46-96C7-ALKJ983DC12C",
@@ -87,7 +87,7 @@
   {
     "Id": "94ec6430-dcdb-4251-b2c1-54e3b993194f",
     "Name": "add more colors: bold folders, blue for interactive pieces, dim completed",
-    "Done": false,
+    "Done": true,
     "Expanded": false,
     "Children": null
   },
@@ -130,7 +130,7 @@
     "Id": "cfe1787c-817c-417c-a95a-8278d1320f87",
     "Name": "future ideas (do these after using it for a while)",
     "Done": false,
-    "Expanded": false,
+    "Expanded": true,
     "Children": [
       {
         "Id": "35A8B8C3-F26D-4034-9FB8-C9F0954833E9",
