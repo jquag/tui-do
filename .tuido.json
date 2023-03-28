@@ -113,18 +113,26 @@
     "Children": null
   },
   {
-    "Id": "9d28c361-b67d-4a30-9fce-c321147d93a7",
-    "Name": "help menus",
-    "Done": false,
-    "Expanded": false,
-    "Children": null
-  },
-  {
     "Id": "6ecc2d22-3107-4773-80fc-7d8e2e8d473f",
     "Name": "add child item",
     "Done": false,
     "Expanded": false,
-    "Children": null
+    "Children": [
+      {
+        "Id": "05a463ef-84c3-4799-bd33-9fd43be08cd9",
+        "Name": "default to expanded after adding",
+        "Done": true,
+        "Expanded": false,
+        "Children": null
+      },
+      {
+        "Id": "96677353-d753-43e4-b7a5-ac3996ae6fbf",
+        "Name": "using A to add child to item that already has children doesn't work",
+        "Done": true,
+        "Expanded": true,
+        "Children": []
+      }
+    ]
   },
   {
     "Id": "01de18a0-6c68-4273-8f38-c31c3c711f0a",
@@ -140,6 +148,13 @@
     "Expanded": true,
     "Children": [
       {
+        "Id": "36e758ff-8b7c-4e70-810b-5a15f6ed4f18",
+        "Name": "help menus",
+        "Done": false,
+        "Expanded": false,
+        "Children": null
+      },
+      {
         "Id": "35A8B8C3-F26D-4034-9FB8-C9F0954833E9",
         "Name": "Add info about completion on parent items",
         "Done": false,
@@ -150,8 +165,8 @@
         "Id": "7fbdd273-9cd8-47d0-8488-3dc17d261cd1",
         "Name": "insert items",
         "Done": false,
-        "Expanded": false,
-        "Children": null
+        "Expanded": true,
+        "Children": []
       },
       {
         "Id": "2d89a807-e3ab-4315-8f7c-cbf41688c504",
@@ -169,7 +184,7 @@
       },
       {
         "Id": "0e10abf3-e81b-4ab1-a7dd-9d332d8e5424",
-        "Name": "fix bug where expand then collapse messes up the scroll position",
+        "Name": "fix bug where expand then collapse messes up the scroll position (other cases as well)",
         "Done": false,
         "Expanded": false,
         "Children": null

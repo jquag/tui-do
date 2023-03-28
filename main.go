@@ -27,6 +27,7 @@ const useHighPerformanceRenderer = false
 type Model struct {
   Svc *service.Service
   isAdding bool
+  isAddingChild bool
   isDeleting bool
   isEditing bool
   todoCursorRow int
@@ -107,7 +108,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
   switch msg := msg.(type) {
   case tea.KeyMsg:
-    if !m.isAdding && !m.isDeleting && !m.isEditing {
+    if !m.isAdding && !m.isAddingChild && !m.isDeleting && !m.isEditing {
       switch msg.String() {
 
         case "ctrl+c", "q":
@@ -134,6 +135,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
             cmds = append(cmds, cmd)
           }
 
+        case "A":
+          if m.Tabs.ActiveIndex == 0 {
+            m.isAddingChild = true
+            m.textInput.Focus()
+            m.textInput.SetValue("")
+            cmd := m.textInput.Cursor.BlinkCmd()
+            cmds = append(cmds, cmd)
+          }
+
         case "c":
           m.isEditing = true
           m.textInput.Focus()
@@ -154,17 +164,19 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
           m.confirmationModal.Title = "Are you sure you want to delete the item?"
           m.confirmationModal.Body = currentItem.Name
       }
-    } else if m.isAdding || m.isEditing {
+    } else if m.isAdding || m.isAddingChild || m.isEditing {
       switch msg.String() {
         case "ctrl+c":
           return m, tea.Quit
 
         case tea.KeyEscape.String():
           m.isAdding = false
+          m.isAddingChild = false
           m.isEditing = false
 
         case tea.KeyEnter.String():
           m.isAdding = false
+          m.isAddingChild = false
           m.isEditing = false
           if initialModel.isAdding {
             if len(todos) == 0 {
@@ -172,8 +184,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
             } else {
               cmds = append(cmds, addTodoCommand(m.Svc, currentItem, m.textInput.Value()))
             }
-          } else {
+          } else if initialModel.isEditing {
             cmds = append(cmds, changeTodoCommand(m.Svc, *currentItem, m.textInput.Value()))
+          } else if initialModel.isAddingChild {
+              cmds = append(cmds, addTodoAsChildCommand(m.Svc, currentItem, m.textInput.Value()))
           }
       }
     } else {
@@ -210,7 +224,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
     }
 
   case string:
-    if msg == "todo-added" {
+    if msg == "todo-added" || msg == "todo-child-added" {
       if len(todos) > 1 {
         m.incCursorRow()
       }
@@ -242,12 +256,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
     m.inactiveTabViewportOffset = initialModel.ListViewport.YOffset
   }
 
-  if !skipViewportUpdate && !m.isAdding {
+  if !skipViewportUpdate && !m.isAdding && !m.isAddingChild && !m.isEditing {
     m.ListViewport, cmd = m.ListViewport.Update(msg)
     cmds = append(cmds, cmd)
   }
 
-  if initialModel.isAdding || initialModel.isEditing {
+  if initialModel.isAdding || initialModel.isAddingChild || initialModel.isEditing {
     var cmd tea.Cmd
     m.textInput, cmd = m.textInput.Update(msg)
     cmds = append(cmds, cmd)
@@ -282,11 +296,11 @@ func (m Model) ContentView() string {
   todos := m.Svc.Todos(m.Tabs.ActiveIndex == 1)
 
   if !m.isAdding && len(todos) == 0 {
-    return style.Muted.Render("No items")
+    return style.Muted.Render(" No items")
   }
 
   if m.isAdding && len(todos) == 0 {
-    return m.textInput.View()
+    return " " + m.textInput.View()
   }
 
   index := 0
@@ -312,17 +326,17 @@ func (m Model) ItemView(item repo.Todo, index int, padding string) (string, int)
   if item.Done {
     nameStyle.Inherit(style.Muted)
   }
-  if isCurrentRow && !m.isAdding {
+  if isCurrentRow && !m.isAdding && !m.isAddingChild {
     outerStyle = style.CheckBoxBracket.Copy().Inherit(style.Highlight)
     innerStyle = style.CheckBox.Copy()
   }
-  if hasChildren {
+  if hasChildren || (m.isAddingChild && isCurrentRow) {
     nameStyle.Inherit(style.ParentColor)
     symbol := "+"
-    if item.Expanded {
+    if item.Expanded || (m.isAddingChild && isCurrentRow) {
       symbol = "-"
     }
-    prefix = fmt.Sprintf("%s%s%s", outerStyle.Render(" "), innerStyle.Render(symbol), outerStyle.Render(" "))
+    prefix = fmt.Sprintf("%s%s%s", outerStyle.Render("("), innerStyle.Render(symbol), outerStyle.Render(")"))
   } else {
     checked := " "
     if item.Done {
@@ -339,6 +353,9 @@ func (m Model) ItemView(item repo.Todo, index int, padding string) (string, int)
       }
     } else if m.isEditing {
       s += "  " + padding + m.textInput.View()
+    } else if m.isAddingChild {
+      s += fmt.Sprintf("%s %s %s", padding, prefix, nameStyle.Render(item.Name))
+      s += "\n  " + padding + "   " + m.textInput.View()
     } else {
       prePrefix := style.Highlight.Render(fmt.Sprintf("%s ", padding))
       postPrefix := style.Highlight.Render(fmt.Sprintf(" %s", nameStyle.Render(item.Name)))
@@ -403,6 +420,13 @@ func addTodoCommand(service *service.Service, afterItem *repo.Todo, name string)
   return func() tea.Msg {
     service.AddTodo(afterItem, name)
     return "todo-added"
+  }
+}
+
+func addTodoAsChildCommand(service *service.Service, parent *repo.Todo, name string) tea.Cmd {
+  return func() tea.Msg {
+    service.AddTodoAsChild(parent, name)
+    return "todo-child-added"
   }
 }
 
