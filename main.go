@@ -281,14 +281,17 @@ func (m Model) View() string {
 		return "\n  Initializing..."
 	}
 
-  if m.isDeleting {
-    return m.confirmationModal.View()
-  }
-
   footer := "\n\n"+style.Muted.Render("Press ? for help")
   tabs := m.Tabs.View()
 
-  return fmt.Sprintf("%s\n\n%s\n%s", tabs, m.ListViewport.View(), footer)
+  content := fmt.Sprintf("%s\n\n%s\n%s", tabs, m.ListViewport.View(), footer)
+
+  if m.isDeleting {
+    m.confirmationModal.BackgroundView = content
+    return m.confirmationModal.View()
+  }
+
+  return content
 }
 
 func (m Model) ContentView() string {

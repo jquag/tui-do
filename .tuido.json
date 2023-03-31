@@ -148,8 +148,8 @@
     "Expanded": true,
     "Children": [
       {
-        "Id": "36e758ff-8b7c-4e70-810b-5a15f6ed4f18",
-        "Name": "help menus",
+        "Id": "e9e0d773-49aa-4300-93d8-eab3df06dee7",
+        "Name": "help modals",
         "Done": false,
         "Expanded": false,
         "Children": null
@@ -225,6 +225,13 @@
         "Children": null
       }
     ]
+  },
+  {
+    "Id": "1c4f11c9-a0cc-4f56-8d9f-9f9695d7c39d",
+    "Name": "modal that retains background text",
+    "Done": true,
+    "Expanded": false,
+    "Children": null
   },
   {
     "Id": "f62c4d2b-4654-4f08-92ff-ad95e9d1f22e",
