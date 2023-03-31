@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/charmbracelet/bubbles/cursor"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -40,6 +41,8 @@ type Model struct {
   width int
   height int
   confirmationModal modal.Model
+  helpModal modal.Model
+  isShowingHelp bool
 } 
 
 func (m Model) cursorRow() int {
@@ -108,7 +111,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
   switch msg := msg.(type) {
   case tea.KeyMsg:
-    if !m.isAdding && !m.isAddingChild && !m.isDeleting && !m.isEditing {
+    if !m.isAdding && !m.isAddingChild && !m.isDeleting && !m.isEditing && !m.isShowingHelp {
       switch msg.String() {
 
         case "ctrl+c", "q":
@@ -163,6 +166,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
           m.isDeleting = true
           m.confirmationModal.Title = "Are you sure you want to delete the item?"
           m.confirmationModal.Body = currentItem.Name + "\n\n" + style.Muted.Render("ENTER-yes, ESC-no")
+
+        case "?":
+          m.isShowingHelp = true
+          m.helpModal.Title = "Key Mappings"
+          m.helpModal.Body = m.helpBodyView()
       }
     } else if m.isAdding || m.isAddingChild || m.isEditing {
       switch msg.String() {
@@ -204,6 +212,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
     m.height = msg.Height
     m.confirmationModal.Width = msg.Width
     m.confirmationModal.Height = msg.Height
+    m.helpModal.Width = msg.Width
+    m.helpModal.Height = msg.Height
     headerHeight := 5 //TODO: calc this
     footerHeight := 3 //TODO: calc this
     verticalMarginHeight := headerHeight + footerHeight
@@ -241,10 +251,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
   case modal.ModalMsg:
     if msg == modal.Confirmed {
-      m.isDeleting = false
-      cmds = append(cmds, deleteTodoCommand(m.Svc, *currentItem))
+      if m.isDeleting {
+        m.isDeleting = false
+        cmds = append(cmds, deleteTodoCommand(m.Svc, *currentItem))
+      }
     } else if msg == modal.Cancelled {
       m.isDeleting = false
+      m.isShowingHelp = false
     }
 
   }
@@ -273,6 +286,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
     cmds = append(cmds, cmd)
   }
 
+  if initialModel.isShowingHelp {
+    var cmd tea.Cmd
+    m.helpModal, cmd = m.helpModal.Update(msg)
+    cmds = append(cmds, cmd)
+  }
+
   return m, tea.Batch(cmds...)
 }
 
@@ -289,6 +308,9 @@ func (m Model) View() string {
   if m.isDeleting {
     m.confirmationModal.BackgroundView = content
     return m.confirmationModal.View()
+  } else if m.isShowingHelp {
+    m.helpModal.BackgroundView = content
+    return m.helpModal.View()
   }
 
   return content
@@ -383,6 +405,23 @@ func (m Model) ItemView(item repo.Todo, index int, padding string) (string, int)
   }
 
   return s, index
+}
+
+func (m Model) helpBodyView() string {
+  lines := []string{}
+  if (m.Tabs.ActiveIndex == 0) {
+    lines = append(lines, "a      " + style.ActionStyle.Render("add new item"))
+    lines = append(lines, "A      " + style.ActionStyle.Render("add new item as child"))
+  }
+
+  lines = append(lines, "c      " + style.ActionStyle.Render("change item"))
+  lines = append(lines, "d      " + style.ActionStyle.Render("delete item"))
+  lines = append(lines, "j      " + style.ActionStyle.Render("move down"))
+  lines = append(lines, "k      " + style.ActionStyle.Render("move up"))
+  lines = append(lines, "space  " + style.ActionStyle.Render("toggle item"))
+  lines = append(lines, "q      " + style.ActionStyle.Render("quit"))
+
+  return "\n" + strings.Join(lines, "\n") + "\n\n"  + style.Muted.Render("ESC-close")
 }
 
 func (m Model) countRows(items []repo.Todo) int {
