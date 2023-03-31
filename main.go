@@ -162,7 +162,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
         case "d":
           m.isDeleting = true
           m.confirmationModal.Title = "Are you sure you want to delete the item?"
-          m.confirmationModal.Body = currentItem.Name
+          m.confirmationModal.Body = currentItem.Name + "\n\n" + style.Muted.Render("ENTER-yes, ESC-no")
       }
     } else if m.isAdding || m.isAddingChild || m.isEditing {
       switch msg.String() {
