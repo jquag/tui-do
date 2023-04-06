@@ -156,10 +156,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
           cmds = append(cmds, cmd)
 
         case tea.KeyEnter.String(), " ":
-          if len(currentItem.Children) > 0 {
-            cmds = append(cmds, toggleExpandedCommand(m.Svc, *currentItem))
-          } else {
-            cmds = append(cmds, toggleTodoCommand(m.Svc, *currentItem))
+          if currentItem != nil {
+            if len(currentItem.Children) > 0 {
+              cmds = append(cmds, toggleExpandedCommand(m.Svc, *currentItem))
+            } else {
+              cmds = append(cmds, toggleTodoCommand(m.Svc, *currentItem))
+            }
           }
 
         case "d":
