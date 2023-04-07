@@ -189,6 +189,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
         case "g":
           m.setCursorRow(0)
           m.ListViewport.SetYOffset(0)
+
+        case "W":
+          cmds = append(cmds, collapseAllCommand(m.Svc, m.Tabs.ActiveIndex == 1))
       }
     } else if m.isAdding || m.isAddingChild || m.isEditing {
       switch msg.String() {
@@ -517,6 +520,13 @@ func deleteTodoCommand(service *service.Service, item repo.Todo) tea.Cmd {
   return func() tea.Msg {
     service.DeleteTodo(item)
     return "todo-deleted"
+  }
+}
+
+func collapseAllCommand(service *service.Service, completed bool) tea.Cmd {
+  return func() tea.Msg {
+    service.CollapseAll(completed)
+    return "todos-collapsed"
   }
 }
 

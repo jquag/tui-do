@@ -98,6 +98,27 @@ func (s *Service) AddTodoAsChild(parent *repo.Todo, name string) {
   s.repo.Persist()
 }
 
+func (s *Service) CollapseAll(completed bool) {
+  for i, item := range s.repo.Todos {
+    if s.isAllDone(item) == completed {
+      (&s.repo.Todos[i]).Expanded = false
+      if len(item.Children) > 0 {
+        s.collapseAllFromSlice((&s.repo.Todos[i]).Children)
+      }
+    }
+  }
+  s.repo.Persist()
+}
+
+func (s *Service) collapseAllFromSlice(todos []repo.Todo) {
+  for i, item := range todos {
+    (&todos[i]).Expanded = false
+    if len(item.Children) > 0 {
+      s.collapseAllFromSlice((&todos[i]).Children)
+    }
+  }
+}
+
 func (s *Service) findItemAndParent(itemId string, currentParent *repo.Todo) (*repo.Todo, *repo.Todo) {
   children := s.repo.Todos
   if currentParent != nil {
