@@ -69,6 +69,14 @@ func (m *Model) decCursorRow() {
   }
 }
 
+func (m *Model) setCursorRow(row int) {
+  if m.Tabs.ActiveIndex == 0 {
+    m.todoCursorRow = row
+  } else {
+    m.completedCursorRow = row
+  }
+}
+
 func initialModel() Model {
   filename := ".tuido.json"
   if (len(os.Args) > 1) {
@@ -173,6 +181,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
           m.isShowingHelp = true
           m.helpModal.Title = "Key Mappings"
           m.helpModal.Body = m.helpBodyView()
+
+        case "G":
+          m.setCursorRow(m.countRows(todos) - 1)
+          m.ListViewport.SetYOffset(m.ListViewport.Height)
+
+        case "g":
+          m.setCursorRow(0)
+          m.ListViewport.SetYOffset(0)
       }
     } else if m.isAdding || m.isAddingChild || m.isEditing {
       switch msg.String() {
@@ -418,9 +434,11 @@ func (m Model) helpBodyView() string {
 
   lines = append(lines, "c      " + style.ActionStyle.Render("change item"))
   lines = append(lines, "d      " + style.ActionStyle.Render("delete item"))
+  lines = append(lines, "space  " + style.ActionStyle.Render("toggle item"))
   lines = append(lines, "j      " + style.ActionStyle.Render("move down"))
   lines = append(lines, "k      " + style.ActionStyle.Render("move up"))
-  lines = append(lines, "space  " + style.ActionStyle.Render("toggle item"))
+  lines = append(lines, "]      " + style.ActionStyle.Render("next tab"))
+  lines = append(lines, "[      " + style.ActionStyle.Render("prev tab"))
   lines = append(lines, "q      " + style.ActionStyle.Render("quit"))
 
   return "\n" + strings.Join(lines, "\n") + "\n\n"  + style.Muted.Render("ESC-close")
